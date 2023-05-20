@@ -1,7 +1,14 @@
-﻿using Grasshopper.Kernel;
-using Rhino.Geometry;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+
+using Rhino;
+using Rhino.Geometry;
+
+using Grasshopper;
+using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -36,9 +43,11 @@ namespace NetworkOffsetWidget
             // All parameters must have the correct access type. If you want 
             // to import lists or trees of values, modify the ParamAccess flag.
 
-            pManager.AddLineParameter("Edges", "E", "Edges", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Weights", "W", "Widths", GH_ParamAccess.list);
+            pManager.AddGeometryParameter("EdgesAsList", "E", "Edges", GH_ParamAccess.list);
+            pManager.AddNumberParameter("WeightsAsList", "W", "Widths", GH_ParamAccess.list);
             pManager.AddNumberParameter("NodeRadius", "R", "Node Radius", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Bake", "B", "Bake", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Seed", "S", "Seed", GH_ParamAccess.item);
 
 
             // If you want to change properties of certain parameters, 
@@ -54,7 +63,9 @@ namespace NetworkOffsetWidget
             // Use the pManager object to register your output parameters.
             // Output parameters do not have default values, but they too must have the correct access type.
             pManager.AddLineParameter("NodesGeometry", "NG", "Nodes Geometry", GH_ParamAccess.list);
-       
+            pManager.AddLineParameter("EdgesGeometry", "EG", "Edges Geometry", GH_ParamAccess.list);
+            pManager.AddTextParameter("Message", "msg", "Message", GH_ParamAccess.item);
+            
 
             // Sometimes you want to hide a specific parameter from the Rhino preview.
             // You can use the HideParameter() method as a quick way:
@@ -71,23 +82,62 @@ namespace NetworkOffsetWidget
             // First, we need to retrieve all data from the input parameters.
             // We'll start by declaring variables and assigning them starting values.
             List<Line> Edges = new List<Line>();
+            List<Line> NodesGeometry = new List<Line>();
+            List<Line> EdgesGeometry = new List<Line>();
+            bool bake = false;
+            int seed = 0;
+            
             List<double> Widths = new List<double>();
             double NodeRadius = 0.3;
 
             // Then we need to access the input parameters individually. 
             // When data cannot be extracted from a parameter, we should abort this method.
-            if (!DA.GetData(0, ref Edges)) return;
-            if (!DA.GetData(1, ref Widths)) return;
+            
+            if (!DA.GetDataList(0, Edges)) return;
+            if (!DA.GetDataList(1, Widths)) return;
             if (!DA.GetData(2, ref NodeRadius)) return;
+            if (!DA.GetData(3, ref bake)) return;
+            if (!DA.GetData(4, ref seed)) return;
+
+
+
 
 
             // We should now validate the data and warn the user if invalid data is supplied.
 
             // Main
 
+            NFNetwork network = new NFNetwork(Edges, Widths, NodeRadius, new Random(seed));
+
+            NodesGeometry = network.GetGeometries();
+
+            NFGeometryCollector collector = new NFGeometryCollector();
+            network.GetEdgeGeometries(ref collector);
+            EdgesGeometry = collector.cutWindow;
+
+
+
+
+
+
+
+
+
+
+            if (bake)
+            {
+                collector.Bake();
+                DA.SetData(2, "Have a nice baking!");
+            } else
+            {
+                DA.SetData(2, "wabawababubu");
+            }
+            
 
             // Finally assign the spiral to the output parameter.
-            DA.SetData(0, spiral);
+            DA.SetDataList(0, NodesGeometry);
+            DA.SetDataList(1, EdgesGeometry);
+
         }
 
 

@@ -53,5 +53,27 @@ namespace NetworkOffsetWidget
                 return "";
             }
         }
+
+
+            /*                                                                  +
+ * V1(Point3D) + ----- | ----- | --- | ----- | ----- + V2(Point3D)  | w
+ *                 X     W/A/D    S     W/A      Y                  +
+ *
+ * Suggested Parameter Ranges (in metres):
+ * w = 0.3
+ * X >= 0.4; Y >= 0.4
+ * 0.4 <= W <= 1.6
+ * 0.8 <= A <= 4.8
+ * D = 0.9
+ * S = 0.4
+ *
+ * Structure for different Edge Types:
+ * SOLID = X-S-Y
+ * WINDOW = X-{WSW}-Y
+ * TRANSP = X-{WSW}-Y 1.2 <= W <= 3
+ * PORTAL = X-{ASA}-Y
+ * DOOR = X-D-Y
+ * F = X-A-Y A:Max
+ */
     }
 }
