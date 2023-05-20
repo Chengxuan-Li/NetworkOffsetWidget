@@ -485,6 +485,7 @@ namespace NetworkOffsetWidget
         public static Random random = new Random();
         public static int RandomPick(List<double> weights, Random random)
         {
+            weights = new List<double>(weights);
             double sum = 0.0;
 
             for (int i = 0; i < weights.Count; i++)
@@ -807,7 +808,7 @@ namespace NetworkOffsetWidget
         public override bool Converge(double target, Random random, out double _dimension)
         {
             int index = RandomPick(random);
-
+            List<double> tempWeights = new List<double>(weights);
             if (target < 0)
             {
                 dimension = picked.semanticsSetting.GenVal(random);
@@ -819,7 +820,7 @@ namespace NetworkOffsetWidget
                 bool converging = true;
                 while (converging)
                 {
-                    if (MathHelper.Sum(weights) <= 0.01)
+                    if (MathHelper.Sum(tempWeights) <= 0.01)
                     {
                         converging = false;
                         dimension = -1.0;
@@ -869,7 +870,7 @@ namespace NetworkOffsetWidget
                             iteration += 1;
                         }
 
-                        weights[index] = 0.0;
+                        tempWeights[index] = 0.0;
                         index = RandomPick(random);
 
                     }

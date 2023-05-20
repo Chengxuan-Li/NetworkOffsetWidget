@@ -111,8 +111,8 @@ namespace NetworkOffsetWidget
 
             NodesGeometry = network.GetGeometries();
 
-            NFGeometryCollector collector = new NFGeometryCollector();
-            network.GetEdgeGeometries(ref collector);
+            NFGeometryCollector collector;
+            network.GetEdgeGeometries(out collector);
             EdgesGeometry = collector.cutWindow;
 
 

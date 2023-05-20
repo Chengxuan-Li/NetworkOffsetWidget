@@ -121,13 +121,17 @@ namespace NetworkOffsetWidget
             return Geometries;
         }
 
-        public void GetEdgeGeometries(ref NFGeometryCollector collector)
+        public void GetEdgeGeometries(out NFGeometryCollector collector)
         {
+            collector = new NFGeometryCollector();
+            // try turning ref into out? and new() evry collctr
             List<Line> Geometries = new List<Line>();
             foreach (NFEdge edge in edges)
             {
                 //placeholder 0519
-                edge.AddGeometry(SGSemanticsRules.ChainedWindow , this, ref collector, random);
+                edge.AddGeometry(SGSemanticsRules.RetailFront , this, ref collector, random);
+
+
             }
         }
     }
@@ -442,6 +446,7 @@ namespace NetworkOffsetWidget
             else if (elem.name == "A")
             {
                 //visibleSill.AddRange(Rectangle(line, width));
+                visibleSill.AddRange(Rectangle(line, 0.1));
                 cutWindow.AddRange(Rectangle(line, 0.01));
 
             }
@@ -453,11 +458,13 @@ namespace NetworkOffsetWidget
             else if (elem.name == "D")
             {
                 cutDoor.AddRange(Door(line));
-                aboveProjection.AddRange(Parallel(line, width));
+                aboveProjection.AddRange(Rectangle(line, width));
 
             }
             else if (elem.name == "W")
             {
+                cutWall.AddRange(Rectangle(line, width));
+                /*
                 cutWall.AddRange(Parallel(line, width));
                 if (isEntry)
                 {
@@ -471,6 +478,7 @@ namespace NetworkOffsetWidget
                     cutWall.AddRange(Entry(line, width));
                     cutWall.AddRange(Exit(line, width));
                 }
+                */
             }
             else if (elem.name == "C")
             {
@@ -631,6 +639,7 @@ namespace NetworkOffsetWidget
         public int FromNodeID;
         public int ToNodeID;
         public double width;
+        public int iterations = 0;
 
         public NFEdge(Line _line, int _ID, int _FromNodeID, int _ToNodeID, double _width)
         {
@@ -651,6 +660,7 @@ namespace NetworkOffsetWidget
             vec.Unitize();
             vec = vec * network.NodeRadius;
             Line newLine = new Line(line.From + vec, line.To - vec);
+
 
             if (elemCopy.Converge(newLine.Length, random, out outDim))
             {
@@ -673,7 +683,41 @@ namespace NetworkOffsetWidget
                 {
                     collector.Add(subElems[i], sliced[i], i == 0, i == sliced.Count - 1);
                 }
+
             }
+            else
+            {
+                iterations += 1;
+                if (iterations > 8)
+                {
+                    return;
+                }
+                else if (iterations <= 2)
+                {
+                    AddGeometry(SGSemanticsRules.ChainedWindow, network, ref collector, random);
+                }
+                else if (iterations <= 3)
+                {
+                    if (random.Next() < 5)
+                    {
+                        AddGeometry(SGSemanticsRules.CurtainWall, network, ref collector, random);
+                    } else
+                    {
+                        AddGeometry(SGSemanticsRules.CurtainWall, network, ref collector, random);
+                    }
+                }
+                else if (iterations <= 6)
+                {
+                    AddGeometry(SGSemanticsRules.ChainedWindow, network, ref collector, random);
+                } else
+                {
+                    AddGeometry(SGSemanticsRules.W, network, ref collector, random);
+                }    
+
+            }
+
+
+
 
         }
 
