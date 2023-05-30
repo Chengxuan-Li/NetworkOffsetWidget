@@ -288,7 +288,10 @@ namespace NetworkOffsetWidget
         static SGSemanticsSetting D_SSetting = new SGSemanticsSetting(0.7, 1.2, 0.05, 105);
 
         static SGSemanticsSetting W_SSetting = new SGSemanticsSetting(0.0, 15, 0.5, 10);
-        static SGSemanticsSetting C_SSetting = new SGSemanticsSetting(0.2, 0.5, 0.1, 102);
+        static SGSemanticsSetting C_SSetting = new SGSemanticsSetting(0.3, 0.5, 0.1, 102);
+
+        static SGSemanticsSetting G_SSetting = new SGSemanticsSetting(1.2, 2.0, 0.1, 106);
+        static SGSemanticsSetting M_SSetting = new SGSemanticsSetting(0.05, 0.2, 0.05, 103);
 
         static SGDrawingSetting F_DSetting = SGDrawingSetting.test;
         static SGDrawingSetting A_DSetting = SGDrawingSetting.test;
@@ -297,6 +300,8 @@ namespace NetworkOffsetWidget
 
         static SGDrawingSetting W_DSetting = SGDrawingSetting.test;
         static SGDrawingSetting C_DSetting = SGDrawingSetting.test;
+        static SGDrawingSetting G_DSetting = SGDrawingSetting.test;
+        static SGDrawingSetting M_DSetting = SGDrawingSetting.test;
 
 
 
@@ -307,6 +312,9 @@ namespace NetworkOffsetWidget
 
         public static SGSemanticsSubElement W = new SGSemanticsSubElement(W_SSetting, W_DSetting, "W");
         public static SGSemanticsSubElement C = new SGSemanticsSubElement(C_SSetting, C_DSetting, "C");
+
+        public static SGSemanticsSubElement G = new SGSemanticsSubElement(G_SSetting, G_DSetting, "G");
+        public static SGSemanticsSubElement M = new SGSemanticsSubElement(M_SSetting, M_DSetting, "M");
 
 
 
@@ -319,9 +327,9 @@ namespace NetworkOffsetWidget
         public static SGSemanticsMultiElement ChainedWindow = new SGSemanticsMultiElement(new List<SGSemanticsElement> { ChainedWindowArr, W });
 
         // Curtain Wall
-        static SGSemanticsMultiElement CurtainWallStr = new SGSemanticsMultiElement(new List<SGSemanticsElement> { C, A });
+        static SGSemanticsMultiElement CurtainWallStr = new SGSemanticsMultiElement(new List<SGSemanticsElement> { M, A });
         static SGSemanticsArrayElement CurtainWallArr = CurtainWallStr.ToArrayElement();
-        public static SGSemanticsMultiElement CurtainWall = new SGSemanticsMultiElement(new List<SGSemanticsElement> { CurtainWallArr, C });
+        public static SGSemanticsMultiElement CurtainWall = new SGSemanticsMultiElement(new List<SGSemanticsElement> { CurtainWallArr, M });
 
         // Wall Window
         public static SGSemanticsMultiElement WallWindow = new SGSemanticsMultiElement(new List<SGSemanticsElement> { W, F, W });
@@ -394,7 +402,7 @@ namespace NetworkOffsetWidget
 
 
         // RetailFront
-        public static SGSemanticsMultiElement RetailFront = new SGSemanticsMultiElement(new List<SGSemanticsElement> { RetailFrontStrVar, D, RetailFrontStrVar });
+        public static SGSemanticsMultiElement RetailFront = new SGSemanticsMultiElement(new List<SGSemanticsElement> { RetailFrontStrVar, D, CurtainWall });
 
         // InteriorSep
         public static SGSemanticsMultiElement InteriorSep = new SGSemanticsMultiElement(new List<SGSemanticsElement> { InteriorSepStrVar, InteriorSepAccsVar, InteriorSepStrVar });
@@ -455,6 +463,84 @@ namespace NetworkOffsetWidget
         // TODO more types to be added
 
 
+        public static SGSemanticsMultiElement T101 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                ChainedWindow, D, W, F, W
+            });
+        public static SGSemanticsMultiElement T102 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                W, G, W
+            });
+        public static SGSemanticsMultiElement T103 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                CurtainWall, G, C, A, C
+            });
+        public static SGSemanticsMultiElement T201 = ChainedWindow.ShallowCopy();
+        public static SGSemanticsMultiElement T202 = CurtainWall.ShallowCopy();
+        public static SGSemanticsMultiElement T203 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                new SGSemanticsMultiElement(new List<SGSemanticsElement> { C, W }).ToArrayElement(), C
+            });
+        public static SGSemanticsMultiElement T301 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                new SGSemanticsVarElement(new List<SGSemanticsElement> { T203, W })
+            });
+        public static SGSemanticsMultiElement T302 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                new SGSemanticsMultiElement(
+                    new List<SGSemanticsElement>
+                    {
+                        new SGSemanticsVarElement(new List<SGSemanticsElement> { ChainedWindow, CurtainWall, W })
+                    }).ToArrayElement()
+            });
+        public static SGSemanticsMultiElement T311 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                new SGSemanticsVarElement(new List<SGSemanticsElement> { T203, W })
+            });
+        public static SGSemanticsMultiElement T312 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                new SGSemanticsMultiElement(
+                    new List<SGSemanticsElement>
+                    {
+                        new SGSemanticsVarElement(new List<SGSemanticsElement> { ChainedWindow, CurtainWall, W })
+                    }).ToArrayElement()
+            });
+        public static SGSemanticsMultiElement T401 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                new SGSemanticsMultiElement(
+                    new List<SGSemanticsElement>
+                    {
+                        C, V
+                    }).ToArrayElement(),
+                C
+            });
+        public static SGSemanticsMultiElement T402 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                C, V, C
+            });
+        public static SGSemanticsMultiElement T403 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                M, V, M
+            });
+        public static SGSemanticsMultiElement T501 = new SGSemanticsMultiElement(
+            new List<SGSemanticsElement>
+            {
+                V
+            });
+
+
+
 
         public SGSemanticsRules()
         {
@@ -483,6 +569,26 @@ namespace NetworkOffsetWidget
     class MathHelper
     {
         public static Random random = new Random();
+
+        public static bool IsLast(List<double> weights)
+        {
+            int num = 0;
+            foreach (double w in weights)
+            {
+                if (w > 0.01)
+                {
+                    num += 1;
+                }
+            }
+            if (num <= 1)
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
+
         public static int RandomPick(List<double> weights, Random random)
         {
             weights = new List<double>(weights);
@@ -834,6 +940,10 @@ namespace NetworkOffsetWidget
                         {
                             double testResult;
                             double surplus;
+                            if (MathHelper.IsLast(tempWeights))
+                            {
+                                isLast = true;
+                            }
                             if (isLast)
                             {
                                 picked.isLast = isLast;

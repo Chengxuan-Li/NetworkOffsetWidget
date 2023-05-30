@@ -20,22 +20,24 @@ namespace NetworkOffsetWidget
     {
         public List<NFNode> nodes = new List<NFNode>();
         public List<NFEdge> edges = new List<NFEdge>();
+        public List<int> BoundaryTypes = new List<int>();
         int CurrentNodeID = 0;
         int CurrentEdgeID = 0;
         public double NodeRadius;
         Random random;
 
-        public NFNetwork(List<Line> EdgeLines, List<double> widths, double _NodeRadius, Random _random)
+        public NFNetwork(List<Line> EdgeLines, List<double> widths, double _NodeRadius, List<int> _BoundaryTypes, Random _random)
         {
             NodeRadius = _NodeRadius;
             random = _random;
+            BoundaryTypes = _BoundaryTypes;
             for (int i = 0; i < EdgeLines.Count; i++)
             {
-                AddEdge(EdgeLines[i], widths[i]);
+                AddEdge(EdgeLines[i], widths[i], BoundaryTypes[i]);
             }
         }
 
-        public void AddEdge(Line line, double width)
+        public void AddEdge(Line line, double width, int bType)
         {
             if (nodes.Count == 0)
             {
@@ -52,7 +54,7 @@ namespace NetworkOffsetWidget
                 CurrentNodeID += 1;
 
 
-                edges.Add(new NFEdge(line, CurrentEdgeID, CurrentNodeID - 2, CurrentNodeID - 1, width));
+                edges.Add(new NFEdge(line, CurrentEdgeID, CurrentNodeID - 2, CurrentNodeID - 1, width, bType));
                 CurrentEdgeID += 1;
             }
             else
@@ -104,7 +106,7 @@ namespace NetworkOffsetWidget
                     CurrentNodeID += 1;
                 }
 
-                edges.Add(new NFEdge(line, CurrentEdgeID, FromNodeID, ToNodeID, width));
+                edges.Add(new NFEdge(line, CurrentEdgeID, FromNodeID, ToNodeID, width, bType));
                 CurrentEdgeID += 1;
 
             }
@@ -129,7 +131,62 @@ namespace NetworkOffsetWidget
             foreach (NFEdge edge in edges)
             {
                 //placeholder 0519
-                edge.AddGeometry(SGSemanticsRules.RetailFront , this, ref collector, random);
+                //edge.AddGeometry(SGSemanticsRules.InteriorSep, this, ref collector, random);
+                if (edge.bType == 101)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T101, this, ref collector, random);
+                } else if (edge.bType == 102)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T102, this, ref collector, random);
+                }
+                else if (edge.bType == 103)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T103, this, ref collector, random);
+                }
+                else if (edge.bType == 201)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T201, this, ref collector, random);
+                }
+                else if (edge.bType == 202)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T202, this, ref collector, random);
+                }
+                else if (edge.bType == 203)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T203, this, ref collector, random);
+                }
+                else if (edge.bType == 301)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T301, this, ref collector, random);
+                }
+                else if (edge.bType == 302)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T302, this, ref collector, random);
+                }
+                else if (edge.bType == 311)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T311, this, ref collector, random);
+                }
+                else if (edge.bType == 312)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T312, this, ref collector, random);
+                }
+                else if (edge.bType == 401)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T401, this, ref collector, random);
+                }
+                else if (edge.bType == 402)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T402, this, ref collector, random);
+                }
+                else if (edge.bType == 403)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T403, this, ref collector, random);
+                }
+                else if (edge.bType == 501)
+                {
+                    edge.AddGeometry(SGSemanticsRules.T501, this, ref collector, random);
+                }
 
 
             }
@@ -183,14 +240,16 @@ namespace NetworkOffsetWidget
         public void SortConnectivity(List<NFEdge> Edges)
         {
             List<int> sorted = new List<int>();
-            sorted.Add(EdgeConnectivities[0]);
-            EdgeConnectivities.RemoveAt(0);
+            List<int> toSort = new List<int>(EdgeConnectivities);
+            sorted.Add(toSort[0]);
 
-            while (EdgeConnectivities.Count > 0)
+            toSort.RemoveAt(0);
+
+            while (toSort.Count > 0)
             {
-                int a = EdgeConnectivities[0];
+                int a = toSort[0];
                 bool added = false;
-                EdgeConnectivities.RemoveAt(0);
+                toSort.RemoveAt(0);
                 for (int i = 0; i < sorted.Count; i++)
                 {
                     if (!EdgeCompare(Edges[a], Edges[sorted[i]]))
@@ -259,7 +318,7 @@ namespace NetworkOffsetWidget
                 a2 = Math.PI;
             }
 
-            return (a1 >= a2);
+            return (a1 > a2);
 
         }
 
@@ -281,6 +340,8 @@ namespace NetworkOffsetWidget
           new Line(leftShoulder, rightShoulder),
           new Line(rightShoulder, rightEntry)
           });
+                //CAP
+                Geometries.Add(new Line(leftEntry, rightEntry));
             }
             else
             {
@@ -312,21 +373,25 @@ namespace NetworkOffsetWidget
                     {
                         if (EdgeA.width == EdgeB.width)
                         {
-                            return new List<Line>{
+                            Geometries.AddRange(new List<Line>{
                 new Line(leftEntry1, rightEntry2),
-                new Line(rightEntry1, leftEntry2)
-                };
+                //new Line(rightEntry1, leftEntry2),
+                new Line(leftEntry1, rightEntry1 )//cAP//ss
+                
+                });
                         }
                         else
                         {
                             Geometries.AddRange(new List<Line>{
                 new Line(leftEntry1, leftShoulder1),
                 new Line(leftShoulder1, rightShoulder2),
-                new Line(rightShoulder2, rightEntry2) /*,
+                new Line(rightShoulder2, rightEntry2), /*,
                 new Line(leftEntry2, leftShoulder2),
                 new Line(leftShoulder2, rightShoulder1),
                 new Line(rightShoulder1, rightEntry1)
                 */
+                new Line(leftEntry1, rightEntry1 )//cAP//ss
+                
                 });
                         }
                     }
@@ -335,7 +400,9 @@ namespace NetworkOffsetWidget
                         Point3d Intersection = EdgePairIntersection(vec1, vec2, EdgeA.width, EdgeB.width);
                         Geometries.AddRange(new List<Line>{
               new Line(leftEntry1, Intersection),
-              new Line(Intersection, rightEntry2)
+              new Line(Intersection, rightEntry2),
+              new Line(leftEntry1, rightEntry1),//cAP
+              //new Line(rightEntry2, rightEntry2 + (rightEntry1 - rightEntry2) /2 )//cap
               });
                     }
 
@@ -484,6 +551,20 @@ namespace NetworkOffsetWidget
             {
                 cutColumn.AddRange(Rectangle(line, line.Length));
             }
+            else if (elem.name == "G")
+            {
+                Point3d A = line.From;
+                Point3d B = line.To;
+                Point3d M = (A + B) / 2;
+                cutDoor.AddRange(Door(new Line(A, M)));
+                cutDoor.AddRange(Door(new Line(B, M), true));
+                aboveProjection.AddRange(Rectangle(line, width));
+            }
+            else if (elem.name == "M")
+            {
+                cutColumn.AddRange(Rectangle(line, 0.1));
+            }
+
         }
 
         protected List<Line> Rectangle(Line line, double width)
@@ -547,6 +628,25 @@ namespace NetworkOffsetWidget
             geos.Add(new Line(line.From + 0.1 * vec + line.Length * vec2, line.From + line.Length * vec2));
             geos.Add(new Line(line.From + line.Length * vec2, line.From));
             return geos;
+        }
+        protected List<Line> Door(Line line, bool flipped)
+        {
+            if (!flipped)
+            {
+                return Door(line);
+            } else
+            {
+                List<Line> geos = new List<Line>();
+                Vector3d vec = new Vector3d(line.To - line.From);
+                Vector3d vec2 = new Vector3d(vec);
+                vec2.Rotate(- Math.PI / 2.0, Vector3d.ZAxis);
+                vec2.Unitize();
+                geos.Add(new Line(line.From, line.From + 0.1 * vec));
+                geos.Add(new Line(line.From + 0.1 * vec, line.From + 0.1 * vec + line.Length * vec2));
+                geos.Add(new Line(line.From + 0.1 * vec + line.Length * vec2, line.From + line.Length * vec2));
+                geos.Add(new Line(line.From + line.Length * vec2, line.From));
+                return geos;
+            }
         }
 
         public void Bake()
@@ -640,14 +740,20 @@ namespace NetworkOffsetWidget
         public int ToNodeID;
         public double width;
         public int iterations = 0;
+        public int bType = 501;
 
-        public NFEdge(Line _line, int _ID, int _FromNodeID, int _ToNodeID, double _width)
+        public NFEdge(Line _line, int _ID, int _FromNodeID, int _ToNodeID, double _width, int _bType)
         {
             line = _line;
             ID = _ID;
             FromNodeID = _FromNodeID;
             ToNodeID = _ToNodeID;
             width = _width;
+            bType = _bType;
+            if (_bType == 311 | _bType == 312)
+            {
+                width = 0.1;
+            }
         }
 
         public void AddGeometry(SGSemanticsElement elem, NFNetwork network, ref NFGeometryCollector collector, Random random)
@@ -692,21 +798,17 @@ namespace NetworkOffsetWidget
                 {
                     return;
                 }
-                else if (iterations <= 2)
-                {
-                    AddGeometry(SGSemanticsRules.ChainedWindow, network, ref collector, random);
-                }
-                else if (iterations <= 3)
+                else if (iterations >= 4)
                 {
                     if (random.Next() < 5)
                     {
                         AddGeometry(SGSemanticsRules.CurtainWall, network, ref collector, random);
                     } else
                     {
-                        AddGeometry(SGSemanticsRules.CurtainWall, network, ref collector, random);
+                        AddGeometry(SGSemanticsRules.ChainedWindow, network, ref collector, random);
                     }
                 }
-                else if (iterations <= 6)
+                else if (iterations >= 7)
                 {
                     AddGeometry(SGSemanticsRules.ChainedWindow, network, ref collector, random);
                 } else

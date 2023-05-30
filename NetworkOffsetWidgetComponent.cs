@@ -46,8 +46,12 @@ namespace NetworkOffsetWidget
             pManager.AddGeometryParameter("EdgesAsList", "E", "Edges", GH_ParamAccess.list);
             pManager.AddNumberParameter("WeightsAsList", "W", "Widths", GH_ParamAccess.list);
             pManager.AddNumberParameter("NodeRadius", "R", "Node Radius", GH_ParamAccess.item);
+
+            pManager.AddIntegerParameter("BoundaryTypesAsList", "B", "Boundary Types", GH_ParamAccess.list);
+
             pManager.AddBooleanParameter("Bake", "B", "Bake", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Seed", "S", "Seed", GH_ParamAccess.item);
+            
 
 
             // If you want to change properties of certain parameters, 
@@ -90,14 +94,17 @@ namespace NetworkOffsetWidget
             List<double> Widths = new List<double>();
             double NodeRadius = 0.3;
 
+            List<int> BoundaryTypes = new List<int>();
+
             // Then we need to access the input parameters individually. 
             // When data cannot be extracted from a parameter, we should abort this method.
             
             if (!DA.GetDataList(0, Edges)) return;
             if (!DA.GetDataList(1, Widths)) return;
             if (!DA.GetData(2, ref NodeRadius)) return;
-            if (!DA.GetData(3, ref bake)) return;
-            if (!DA.GetData(4, ref seed)) return;
+            if (!DA.GetDataList(3, BoundaryTypes)) return;
+            if (!DA.GetData(4, ref bake)) return;
+            if (!DA.GetData(5, ref seed)) return;
 
 
 
@@ -107,7 +114,7 @@ namespace NetworkOffsetWidget
 
             // Main
 
-            NFNetwork network = new NFNetwork(Edges, Widths, NodeRadius, new Random(seed));
+            NFNetwork network = new NFNetwork(Edges, Widths, NodeRadius, BoundaryTypes, new Random(seed));
 
             NodesGeometry = network.GetGeometries();
 
